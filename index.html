@@ -4,179 +4,117 @@
   <meta charset="UTF-8">
   <title>Daily Tools Web</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; background:#f9f9f9; }
-    main { display:grid; gap:20px; }
-    section { background:#fff; border:1px solid #ccc; border-radius:8px; padding:15px; }
-    h2 { margin-top:0; }
-    input, textarea, select, button { margin:5px 0; padding:8px; }
-    .result { margin-top:10px; font-weight:bold; }
+    body { font-family: Arial, sans-serif; margin: 20px; background:#f5f5f5; }
+    section { border: 1px solid #ccc; border-radius: 8px; padding: 15px; margin-bottom: 20px; background:#fff; }
+    h2 { margin-top: 0; }
+    input, select, button { margin: 5px 0; padding: 8px; }
+    .result { margin-top: 10px; font-weight: bold; }
   </style>
 </head>
 <body>
   <h1>🌍 Daily Tools Web</h1>
-  <main>
 
-    <!-- Currency Converter -->
-    <section>
-      <h2>💱 Currency Converter</h2>
-      <input type="number" id="cur_amount" placeholder="Amount" value="1">
-      <div>
-        <select id="cur_from"></select>
-        <select id="cur_to"></select>
-      </div>
-      <button onclick="convertCurrency()">Convert</button>
-      <button onclick="fetchRates()">Update rates</button>
-      <div class="result" id="cur_result">Result will appear here</div>
-    </section>
+  <!-- Age Calculator -->
+  <section>
+    <h2>Age Calculator</h2>
+    <label for="day">Day:</label>
+    <select id="day"></select>
+    <label for="month">Month:</label>
+    <select id="month"></select>
+    <label for="year">Year:</label>
+    <select id="year"></select>
+    <button onclick="calculateAge()">Calculate Age</button>
+    <p id="ageResult"></p>
+  </section>
 
-    <!-- Gold Price -->
-    <section>
-      <h2>🏅 Gold Price</h2>
-      <button onclick="getGoldPrice()">Get Gold Price (USD/oz)</button>
-      <div class="result" id="gold_result"></div>
-    </section>
+  <!-- Gold Price -->
+  <section>
+    <h2>Live Gold Price</h2>
+    <button onclick="getGoldPrice()">Get Gold Price</button>
+    <div id="gold_result" class="result"></div>
+  </section>
 
-    <!-- Prayer Times -->
-    <section>
-      <h2>🕌 Prayer Times</h2>
-      <input type="text" id="city" placeholder="Enter city (e.g. Riyadh)">
-      <input type="text" id="country" placeholder="Enter country (e.g. Saudi Arabia)">
-      <button onclick="getPrayerTimes()">Get Prayer Times</button>
-      <div class="result" id="prayer_result"></div>
-    </section>
+  <!-- Forex Market -->
+  <section>
+    <h2>Forex Market Prices</h2>
+    <button onclick="getForex()">Get Forex Rates</button>
+    <div id="forex_result" class="result"></div>
+  </section>
 
-    <!-- Weather -->
-    <section>
-      <h2>⛅ Weather</h2>
-      <input type="text" id="weather_city" placeholder="Enter city (e.g. London)">
-      <button onclick="getWeather()">Get Weather</button>
-      <div class="result" id="weather_result"></div>
-    </section>
-
-    <!-- BMI Calculator -->
-    <section>
-      <h2>⚖️ BMI Calculator</h2>
-      <input type="number" id="bmi_weight" placeholder="Weight (kg)">
-      <input type="number" id="bmi_height" placeholder="Height (cm)">
-      <button onclick="calcBMI()">Calculate BMI</button>
-      <div class="result" id="bmi_result"></div>
-    </section>
-
-    <!-- Word Counter -->
-    <section>
-      <h2>📝 Word Counter</h2>
-      <textarea id="word_text" rows="4" cols="40" placeholder="Type your text here..."></textarea>
-      <button onclick="countWords()">Count Words</button>
-      <div class="result" id="word_result"></div>
-    </section>
-
-  </main>
+  <!-- Crypto Market -->
+  <section>
+    <h2>Crypto Prices</h2>
+    <button onclick="getCrypto()">Get Crypto Prices</button>
+    <div id="crypto_result" class="result"></div>
+  </section>
 
   <script>
-    // --- Currency Converter ---
-    let rates = { USD:1, EUR:0.95, SAR:3.75, PKR:278, INR:83, AED:3.67 };
+    // ---------------- AGE CALCULATOR ----------------
+    const daySelect = document.getElementById("day");
+    const monthSelect = document.getElementById("month");
+    const yearSelect = document.getElementById("year");
 
-    const curFrom = document.getElementById("cur_from");
-    const curTo = document.getElementById("cur_to");
-
-    function populateCurrencies(){
-      Object.keys(rates).forEach(code=>{
-        let opt1=document.createElement("option");
-        opt1.value=code; opt1.textContent=code;
-        let opt2=opt1.cloneNode(true);
-        curFrom.appendChild(opt1);
-        curTo.appendChild(opt2);
-      });
-      curFrom.value="USD"; curTo.value="PKR";
-    }
-    populateCurrencies();
-
-    function convertCurrency(){
-      let amt=document.getElementById("cur_amount").value;
-      let from=curFrom.value, to=curTo.value;
-      let result=(amt/rates[from])*rates[to];
-      document.getElementById("cur_result").textContent=
-        `${amt} ${from} = ${result.toFixed(2)} ${to}`;
+    for(let d=1; d<=31; d++){
+      let opt=document.createElement("option");
+      opt.value=d; opt.textContent=d;
+      daySelect.appendChild(opt);
     }
 
-    async function fetchRates(){
-      try {
-        let res=await fetch("https://api.exchangerate.host/latest?base=USD");
-        let data=await res.json();
-        rates=data.rates;
-        alert("Rates updated from API!");
-      } catch(e){
-        alert("Failed to fetch live rates, using sample data.");
-      }
+    const months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    months.forEach((m, idx)=>{
+      let opt=document.createElement("option");
+      opt.value=idx; opt.textContent=m;
+      monthSelect.appendChild(opt);
+    });
+
+    let currentYear=new Date().getFullYear();
+    for(let y=currentYear; y>=1900; y--){
+      let opt=document.createElement("option");
+      opt.value=y; opt.textContent=y;
+      yearSelect.appendChild(opt);
     }
 
-    // --- Gold Price (new reliable API from goldapi.io demo key) ---
+    function calculateAge(){
+      let d=parseInt(daySelect.value);
+      let m=parseInt(monthSelect.value);
+      let y=parseInt(yearSelect.value);
+      let dob=new Date(y,m,d);
+      let diff=Date.now()-dob.getTime();
+      let ageDate=new Date(diff);
+      let age=Math.abs(ageDate.getUTCFullYear()-1970);
+      document.getElementById("ageResult").innerText="You are "+age+" years old.";
+    }
+
+    // ---------------- GOLD PRICE ----------------
     async function getGoldPrice(){
       try {
-        let res=await fetch("https://www.goldapi.io/api/XAU/USD", {
-          headers: { "x-access-token": "goldapi-1h6061kmgb1gnfe-io" } // 
+        let res=await fetch("https://www.goldapi.io/api/XAU/USD",{
+          headers:{
+            "x-access-token":"goldapi-1h6061kmgb1gnfe-io",
+            "Content-Type":"application/json"
+          }
         });
         let data=await res.json();
-        document.getElementById("gold_result").textContent=
-          "Gold Price: $" + data.price + " per oz";
+        if(data && data.price){
+          document.getElementById("gold_result").innerText =
+            "Gold Price: $" + data.price + " per ounce (USD)";
+        } else {
+          document.getElementById("gold_result").innerText = "Could not fetch gold price.";
+        }
       } catch(e){
-        document.getElementById("gold_result").textContent="Error fetching gold price.";
+        document.getElementById("gold_result").innerText = "Error fetching gold price.";
       }
     }
 
-    // --- Prayer Times ---
-    async function getPrayerTimes(){
-      let city=document.getElementById("city").value;
-      let country=document.getElementById("country").value;
+    // ---------------- FOREX ----------------
+    async function getForex(){
       try {
-        let res=await fetch(`https://api.aladhan.com/v1/timingsByCity?city=${city}&country=${country}`);
+        let res=await fetch("https://open.er-api.com/v6/latest/USD");
         let data=await res.json();
-        let timings=data.data.timings;
-        document.getElementById("prayer_result").textContent=
-          `Fajr: ${timings.Fajr}, Dhuhr: ${timings.Dhuhr}, Asr: ${timings.Asr}, Maghrib: ${timings.Maghrib}, Isha: ${timings.Isha}`;
+        let eur=data.rates.EUR;
+        let gbp=data.rates.GBP;
+        let jpy=data.rates.JPY;
+        document.getElementById("forex_result").innerText =
+          `EUR/USD: ${eur} | GBP/USD: ${gbp} | USD/JPY: ${jpy}`;
       } catch(e){
-        document.getElementById("prayer_result").textContent="Error fetching prayer times.";
-      }
-    }
-
-    // --- Weather ---
-    async function getWeather(){
-      let city=document.getElementById("weather_city").value;
-      try {
-        let res=await fetch(`https://wttr.in/${city}?format=j1`);
-        let data=await res.json();
-        let temp=data.current_condition[0].temp_C;
-        let desc=data.current_condition[0].weatherDesc[0].value;
-        document.getElementById("weather_result").textContent=
-          `${city}: ${temp}°C, ${desc}`;
-      } catch(e){
-        document.getElementById("weather_result").textContent="Error fetching weather.";
-      }
-    }
-
-    // --- BMI Calculator ---
-    function calcBMI(){
-      let w=parseFloat(document.getElementById("bmi_weight").value);
-      let h=parseFloat(document.getElementById("bmi_height").value)/100;
-      if(!w || !h){ 
-        document.getElementById("bmi_result").textContent="Enter valid values";
-        return;
-      }
-      let bmi=(w/(h*h)).toFixed(2);
-      let status="";
-      if(bmi<18.5) status="Underweight";
-      else if(bmi<24.9) status="Normal";
-      else if(bmi<29.9) status="Overweight";
-      else status="Obese";
-      document.getElementById("bmi_result").textContent=`BMI: ${bmi} (${status})`;
-    }
-
-    // --- Word Counter ---
-    function countWords(){
-      let text=document.getElementById("word_text").value.trim();
-      let words=text ? text.split(/\s+/).length : 0;
-      document.getElementById("word_result").textContent=`Words: ${words}`;
-    }
-  </script>
-</body>
-</html>
+        document.getElementById("forex_result").innerT_
