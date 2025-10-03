@@ -203,10 +203,27 @@ async function fetchRates(){
       const price = parseFloat($('#gold_price').value)||0; const qty = parseFloat($('#gold_qty').value)||0;
       $('#gold_result').innerText = `${qty} g × ${price.toFixed(2)} = ${(price*qty).toFixed(2)}`;
     }
-    async function fetchGold(){
-      $('#gold_result').innerText = 'Live fetch not configured. Edit template fetchGold() to call your metals API and provide API key.';
+    // --- Gold Price API using Metals.live ---
+async function fetchGold(){
+  document.getElementById('gold_result').innerText = 'Fetching gold price...';
+  try{
+    const res = await fetch('https://api.metals.live/v1/spot');
+    if(!res.ok) throw new Error('Network: ' + res.status);
+    const json = await res.json();
+    // API returns array of objects, take first gold price
+    let goldData = json.find(item => item.gold);
+    if(goldData){
+      document.getElementById('gold_result').innerText = 
+        'Gold price: $' + goldData.gold + ' per ounce';
+    } else {
+      document.getElementById('gold_result').innerText = 'Gold price not found in response';
     }
-
+  }catch(e){
+    console.error(e);
+    document.getElementById('gold_result').innerText = 'Error: ' + e.message;
+  }
+}
+    
     // -------------------- Unit Converter --------------------
     function renderUnitInputs(){
       const t = $('#uc_type').value; let html='';
