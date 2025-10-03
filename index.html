@@ -8,7 +8,7 @@
     main { display:grid; gap:20px; }
     section { background:#fff; border:1px solid #ccc; border-radius:8px; padding:15px; }
     h2 { margin-top:0; }
-    input, select, button { margin:5px 0; padding:8px; }
+    input, textarea, select, button { margin:5px 0; padding:8px; }
     .result { margin-top:10px; font-weight:bold; }
   </style>
 </head>
@@ -53,6 +53,23 @@
       <div class="result" id="weather_result"></div>
     </section>
 
+    <!-- BMI Calculator -->
+    <section>
+      <h2>⚖️ BMI Calculator</h2>
+      <input type="number" id="bmi_weight" placeholder="Weight (kg)">
+      <input type="number" id="bmi_height" placeholder="Height (cm)">
+      <button onclick="calcBMI()">Calculate BMI</button>
+      <div class="result" id="bmi_result"></div>
+    </section>
+
+    <!-- Word Counter -->
+    <section>
+      <h2>📝 Word Counter</h2>
+      <textarea id="word_text" rows="4" cols="40" placeholder="Type your text here..."></textarea>
+      <button onclick="countWords()">Count Words</button>
+      <div class="result" id="word_result"></div>
+    </section>
+
   </main>
 
   <script>
@@ -93,14 +110,15 @@
       }
     }
 
-    // --- Gold Price ---
+    // --- Gold Price (new reliable API from goldapi.io demo key) ---
     async function getGoldPrice(){
       try {
-        let res=await fetch("https://api.metals.live/v1/spot");
+        let res=await fetch("https://www.goldapi.io/api/XAU/USD", {
+          headers: { "x-access-token": "goldapi-22l0wz7wrx7qf-io" } // demo key
+        });
         let data=await res.json();
-        let gold=data.find(x=>x.hasOwnProperty("gold"));
         document.getElementById("gold_result").textContent=
-          "Gold Price: $" + gold.gold + " per oz";
+          "Gold Price: $" + data.price + " per oz";
       } catch(e){
         document.getElementById("gold_result").textContent="Error fetching gold price.";
       }
@@ -125,7 +143,6 @@
     async function getWeather(){
       let city=document.getElementById("weather_city").value;
       try {
-        // Free API (no key required)
         let res=await fetch(`https://wttr.in/${city}?format=j1`);
         let data=await res.json();
         let temp=data.current_condition[0].temp_C;
@@ -135,6 +152,30 @@
       } catch(e){
         document.getElementById("weather_result").textContent="Error fetching weather.";
       }
+    }
+
+    // --- BMI Calculator ---
+    function calcBMI(){
+      let w=parseFloat(document.getElementById("bmi_weight").value);
+      let h=parseFloat(document.getElementById("bmi_height").value)/100;
+      if(!w || !h){ 
+        document.getElementById("bmi_result").textContent="Enter valid values";
+        return;
+      }
+      let bmi=(w/(h*h)).toFixed(2);
+      let status="";
+      if(bmi<18.5) status="Underweight";
+      else if(bmi<24.9) status="Normal";
+      else if(bmi<29.9) status="Overweight";
+      else status="Obese";
+      document.getElementById("bmi_result").textContent=`BMI: ${bmi} (${status})`;
+    }
+
+    // --- Word Counter ---
+    function countWords(){
+      let text=document.getElementById("word_text").value.trim();
+      let words=text ? text.split(/\s+/).length : 0;
+      document.getElementById("word_result").textContent=`Words: ${words}`;
     }
   </script>
 </body>
