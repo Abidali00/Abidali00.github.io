@@ -84,15 +84,42 @@
   </section>
 
   <!-- Prayer Times -->
-  <section>
-    <h2>Prayer Times</h2>
-    <input type="text" id="pray_city" placeholder="Enter city">
-    <input type="text" id="pray_country" placeholder="Enter country">
-    <button onclick="getPrayerTimes()">Get Prayer Times</button>
-    <div id="prayer_result" class="result"></div>
-  </section>
+  <!-- Prayer Times -->
+<section>
+  <h2>Prayer Times (Worldwide)</h2>
+  <input type="text" id="pray_city" placeholder="Enter city (e.g. Karachi)">
+  <input type="text" id="pray_country" placeholder="Enter country (e.g. Pakistan)">
+  <button onclick="getPrayerTimes()">Get Prayer Times</button>
+  <div id="pray_result" class="result"></div>
+</section>
 
-  <script>
+<script>
+  // ---------------- PRAYER TIMES (Worldwide) ----------------
+  async function getPrayerTimes(){
+    let city = document.getElementById("pray_city").value;
+    let country = document.getElementById("pray_country").value;
+    try {
+      let res = await fetch(`https://api.aladhan.com/v1/timingsByCity?city=${city}&country=${country}&method=2`);
+      let data = await res.json();
+      if(data.data && data.data.timings){
+        let t = data.data.timings;
+        document.getElementById("pray_result").innerHTML = `
+          <strong>Prayer Times for ${city}, ${country}</strong><br>
+          🕌 Fajr: ${t.Fajr} <br>
+          🕌 Dhuhr: ${t.Dhuhr} <br>
+          🕌 Asr: ${t.Asr} <br>
+          🕌 Maghrib: ${t.Maghrib} <br>
+          🕌 Isha: ${t.Isha}
+        `;
+      } else {
+        document.getElementById("pray_result").innerText = "Could not fetch prayer times.";
+      }
+    } catch(e){
+      document.getElementById("pray_result").innerText = "Error fetching prayer times.";
+    }
+  }
+</script>
+  
     // ---------------- AGE CALCULATOR ----------------
     const daySelect=document.getElementById("day");
     const monthSelect=document.getElementById("month");
