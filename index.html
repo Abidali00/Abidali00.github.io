@@ -270,7 +270,28 @@ async function fetchGold(){
 
     // -------------------- Prayer times (AlAdhan) --------------------
     async function getPrayerTimes(){ const city = $('#pt_city').value.trim(); const country = $('#pt_country').value.trim(); const method = $('#pt_method').value; if(!city||!country){$('#pt_result').innerText='Enter city and country.';return} $('#pt_result').innerText='Fetching prayer times...'; try{ const address = encodeURIComponent(city + ',' + country); const url = `https://api.aladhan.com/v1/timingsByAddress?address=${address}&method=${method}`; const res = await fetch(url); if(!res.ok) throw new Error('Network'); const json = await res.json(); if(!json || json.code!==200){ $('#pt_result').innerText='API error'; return } const timings = json.data.timings; let html = '<strong>Timings for ' + (json.data.date.readable|| (city+','+country)) + '</strong><ul>'; ['Fajr','Sunrise','Dhuhr','Asr','Maghrib','Isha'].forEach(k=> html += `<li>${k}: ${timings[k]}</li>`); html += '</ul>'; $('#pt_result').innerHTML = html; }catch(e){ $('#pt_result').innerText = 'Could not fetch prayer times. (Network/CORS)'; } }
-
+// --- Prayer Times API using Aladhan ---
+async function getPrayerTimes(){
+  document.getElementById('prayer_result').innerText = 'Fetching prayer times...';
+  try{
+    const res = await fetch('https://api.aladhan.com/v1/timingsByCity?city=Riyadh&country=Saudi%20Arabia&method=2');
+    if(!res.ok) throw new Error('Network: ' + res.status);
+    const json = await res.json();
+    if(json && json.data && json.data.timings){
+      let times = json.data.timings;
+      let display = Object.entries(times)
+        .map(([name,time])=> `${name}: ${time}`)
+        .join('<br>');
+      document.getElementById('prayer_result').innerHTML = display;
+    } else {
+      document.getElementById('prayer_result').innerText = 'No timings found.';
+    }
+  }catch(e){
+    console.error(e);
+    document.getElementById('prayer_result').innerText = 'Error: ' + e.message;
+  }
+}
+    
     // -------------------- Init --------------------
     populateCurrencySelectors();
   </script>
