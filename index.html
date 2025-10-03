@@ -7,7 +7,7 @@
     body { font-family: Arial, sans-serif; margin: 20px; background:#f5f5f5; }
     section { border: 1px solid #ccc; border-radius: 8px; padding: 15px; margin-bottom: 20px; background:#fff; }
     h2 { margin-top: 0; }
-    input, select, button { margin: 5px 0; padding: 8px; }
+    input, select, textarea, button { margin: 5px 0; padding: 8px; }
     .result { margin-top: 10px; font-weight: bold; }
   </style>
 </head>
@@ -17,11 +17,11 @@
   <!-- Age Calculator -->
   <section>
     <h2>Age Calculator</h2>
-    <label for="day">Day:</label>
+    <label>Day:</label>
     <select id="day"></select>
-    <label for="month">Month:</label>
+    <label>Month:</label>
     <select id="month"></select>
-    <label for="year">Year:</label>
+    <label>Year:</label>
     <select id="year"></select>
     <button onclick="calculateAge()">Calculate Age</button>
     <p id="ageResult"></p>
@@ -48,62 +48,70 @@
     <div id="crypto_result" class="result"></div>
   </section>
 
+  <!-- Currency Converter -->
+  <section>
+    <h2>Currency Converter</h2>
+    <input type="number" id="cur_amount" value="1">
+    <select id="cur_from"></select>
+    <select id="cur_to"></select>
+    <button onclick="convertCurrency()">Convert</button>
+    <div id="cur_result" class="result"></div>
+  </section>
+
+  <!-- BMI Calculator -->
+  <section>
+    <h2>BMI Calculator</h2>
+    <input type="number" id="bmi_weight" placeholder="Weight (kg)">
+    <input type="number" id="bmi_height" placeholder="Height (cm)">
+    <button onclick="calculateBMI()">Calculate BMI</button>
+    <div id="bmi_result" class="result"></div>
+  </section>
+
+  <!-- Word Counter -->
+  <section>
+    <h2>Word Counter</h2>
+    <textarea id="word_text" rows="4" cols="40" placeholder="Type text here..."></textarea>
+    <button onclick="countWords()">Count Words</button>
+    <div id="word_result" class="result"></div>
+  </section>
+
+  <!-- Weather -->
+  <section>
+    <h2>Weather</h2>
+    <input type="text" id="weather_city" placeholder="Enter city">
+    <button onclick="getWeather()">Get Weather</button>
+    <div id="weather_result" class="result"></div>
+  </section>
+
+  <!-- Prayer Times -->
+  <section>
+    <h2>Prayer Times</h2>
+    <input type="text" id="pray_city" placeholder="Enter city">
+    <input type="text" id="pray_country" placeholder="Enter country">
+    <button onclick="getPrayerTimes()">Get Prayer Times</button>
+    <div id="prayer_result" class="result"></div>
+  </section>
+
   <script>
     // ---------------- AGE CALCULATOR ----------------
-    const daySelect = document.getElementById("day");
-    const monthSelect = document.getElementById("month");
-    const yearSelect = document.getElementById("year");
-
-    for(let d=1; d<=31; d++){
-      let opt=document.createElement("option");
-      opt.value=d; opt.textContent=d;
-      daySelect.appendChild(opt);
-    }
-
+    const daySelect=document.getElementById("day");
+    const monthSelect=document.getElementById("month");
+    const yearSelect=document.getElementById("year");
+    for(let d=1; d<=31; d++){ let opt=document.createElement("option"); opt.value=d; opt.textContent=d; daySelect.appendChild(opt); }
     const months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-    months.forEach((m, idx)=>{
-      let opt=document.createElement("option");
-      opt.value=idx; opt.textContent=m;
-      monthSelect.appendChild(opt);
-    });
-
+    months.forEach((m,idx)=>{ let opt=document.createElement("option"); opt.value=idx; opt.textContent=m; monthSelect.appendChild(opt); });
     let currentYear=new Date().getFullYear();
-    for(let y=currentYear; y>=1900; y--){
-      let opt=document.createElement("option");
-      opt.value=y; opt.textContent=y;
-      yearSelect.appendChild(opt);
-    }
-
-    function calculateAge(){
-      let d=parseInt(daySelect.value);
-      let m=parseInt(monthSelect.value);
-      let y=parseInt(yearSelect.value);
-      let dob=new Date(y,m,d);
-      let diff=Date.now()-dob.getTime();
-      let ageDate=new Date(diff);
-      let age=Math.abs(ageDate.getUTCFullYear()-1970);
-      document.getElementById("ageResult").innerText="You are "+age+" years old.";
-    }
+    for(let y=currentYear; y>=1900; y--){ let opt=document.createElement("option"); opt.value=y; opt.textContent=y; yearSelect.appendChild(opt); }
+    function calculateAge(){ let d=parseInt(daySelect.value); let m=parseInt(monthSelect.value); let y=parseInt(yearSelect.value); let dob=new Date(y,m,d); let diff=Date.now()-dob.getTime(); let ageDate=new Date(diff); let age=Math.abs(ageDate.getUTCFullYear()-1970); document.getElementById("ageResult").innerText="You are "+age+" years old."; }
 
     // ---------------- GOLD PRICE ----------------
     async function getGoldPrice(){
       try {
-        let res=await fetch("https://www.goldapi.io/api/XAU/USD",{
-          headers:{
-            "x-access-token":"goldapi-1h6061kmgb1gnfe-io",
-            "Content-Type":"application/json"
-          }
-        });
+        let res=await fetch("https://www.goldapi.io/api/XAU/USD",{ headers:{ "x-access-token":"goldapi-1h6061kmgb1gnfe-io","Content-Type":"application/json" }});
         let data=await res.json();
-        if(data && data.price){
-          document.getElementById("gold_result").innerText =
-            "Gold Price: $" + data.price + " per ounce (USD)";
-        } else {
-          document.getElementById("gold_result").innerText = "Could not fetch gold price.";
-        }
-      } catch(e){
-        document.getElementById("gold_result").innerText = "Error fetching gold price.";
-      }
+        if(data && data.price){ document.getElementById("gold_result").innerText="Gold Price: $"+data.price+" per ounce (USD)"; }
+        else { document.getElementById("gold_result").innerText="Could not fetch gold price."; }
+      } catch(e){ document.getElementById("gold_result").innerText="Error fetching gold price."; }
     }
 
     // ---------------- FOREX ----------------
@@ -111,10 +119,96 @@
       try {
         let res=await fetch("https://open.er-api.com/v6/latest/USD");
         let data=await res.json();
-        let eur=data.rates.EUR;
-        let gbp=data.rates.GBP;
-        let jpy=data.rates.JPY;
-        document.getElementById("forex_result").innerText =
-          `EUR/USD: ${eur} | GBP/USD: ${gbp} | USD/JPY: ${jpy}`;
-      } catch(e){
-        document.getElementById("forex_result").innerT_
+        let eur=data.rates.EUR, gbp=data.rates.GBP, jpy=data.rates.JPY;
+        document.getElementById("forex_result").innerText=`EUR/USD: ${eur} | GBP/USD: ${gbp} | USD/JPY: ${jpy}`;
+      } catch(e){ document.getElementById("forex_result").innerText="Error fetching forex data."; }
+    }
+
+    // ---------------- CRYPTO ----------------
+    async function getCrypto(){
+      try {
+        let res=await fetch("https://api.coindesk.com/v1/bpi/currentprice.json");
+        let data=await res.json();
+        let btc=data.bpi.USD.rate;
+        let ethRes=await fetch("https://api.coincap.io/v2/assets/ethereum");
+        let ethData=await ethRes.json();
+        let eth=ethData.data.priceUsd;
+        document.getElementById("crypto_result").innerText=`BTC/USD: $${btc} | ETH/USD: $${parseFloat(eth).toFixed(2)}`;
+      } catch(e){ document.getElementById("crypto_result").innerText="Error fetching crypto data."; }
+    }
+
+    // ---------------- CURRENCY CONVERTER ----------------
+    async function convertCurrency(){
+      let amount=document.getElementById("cur_amount").value;
+      let from=document.getElementById("cur_from").value;
+      let to=document.getElementById("cur_to").value;
+      try {
+        let res=await fetch(`https://open.er-api.com/v6/latest/${from}`);
+        let data=await res.json();
+        let rate=data.rates[to];
+        let result=amount*rate;
+        document.getElementById("cur_result").innerText=`${amount} ${from} = ${result.toFixed(2)} ${to}`;
+      } catch(e){ document.getElementById("cur_result").innerText="Error converting currency."; }
+    }
+    const cur_from=document.getElementById("cur_from"), cur_to=document.getElementById("cur_to");
+    let currencies=["USD","EUR","GBP","JPY","PKR","SAR","AED","INR"];
+    currencies.forEach(c=>{ let opt=document.createElement("option"); opt.value=c; opt.textContent=c; cur_from.appendChild(opt.cloneNode(true)); cur_to.appendChild(opt); });
+    cur_from.value="USD"; cur_to.value="PKR";
+
+    // ---------------- BMI ----------------
+    function calculateBMI(){
+      let w=document.getElementById("bmi_weight").value;
+      let h=document.getElementById("bmi_height").value/100;
+      if(w && h){ let bmi=w/(h*h); document.getElementById("bmi_result").innerText="Your BMI is "+bmi.toFixed(2); }
+      else { document.getElementById("bmi_result").innerText="Enter valid values."; }
+    }
+
+    // ---------------- WORD COUNTER ----------------
+    function countWords(){
+      let text=document.getElementById("word_text").value.trim();
+      let words=text.split(/\s+/).filter(w=>w.length>0);
+      document.getElementById("word_result").innerText=`Words: ${words.length}, Characters: ${text.length}`;
+    }
+
+    // ---------------- WEATHER ----------------
+    <!-- Weather -->
+<section>
+  <h2>Weather</h2>
+  <input type="text" id="weather_city" placeholder="Enter city">
+  <button onclick="getWeather()">Get Weather</button>
+  <div id="weather_result" class="result"></div>
+</section>
+
+<script>
+  // ---------------- WEATHER ----------------
+  async function getWeather(){
+    let city=document.getElementById("weather_city").value;
+    try {
+      let res=await fetch(`https://wttr.in/${city}?format=j1`);
+      let data=await res.json();
+      let temp=data.current_condition[0].temp_C;
+      let desc=data.current_condition[0].weatherDesc[0].value;
+      document.getElementById("weather_result").innerText=`${city}: ${temp}°C, ${desc}`;
+    } catch(e){
+      document.getElementById("weather_result").innerText="Error fetching weather.";
+    }
+  }
+</script>
+  
+
+    // ---------------- PRAYER TIMES ----------------
+    async function getPrayerTimes(){
+      let city=document.getElementById("pray_city").value;
+      let country=document.getElementById("pray_country").value;
+      try {
+        let res=await fetch(`https://api.aladhan.com/v1/timingsByCity?city=${city}&country=${country}&method=2`);
+        let data=await res.json();
+        if(data.data && data.data.timings){
+          let t=data.data.timings;
+          document.getElementById("prayer_result").innerText=`Fajr: ${t.Fajr} | Dhuhr: ${t.Dhuhr} | Asr: ${t.Asr} | Maghrib: ${t.Maghrib} | Isha: ${t.Isha}`;
+        } else { document.getElementById("prayer_result").innerText="Could not fetch prayer times."; }
+      } catch(e){ document.getElementById("prayer_result").innerText="Error fetching prayer times."; }
+    }
+  </script>
+</body>
+</html>
