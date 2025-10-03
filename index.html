@@ -169,18 +169,34 @@
       const result = (amount / (rates[from]||1)) * (rates[to]||1);
       $('#cur_result').innerText = `${amount} ${from} = ${result.toFixed(4)} ${to}`;
     }
-    async function fetchRates(){
-      $('#cur_result').innerText = 'Fetching live rates...';
-      try{
-        // Public endpoint (no key): https://open.er-api.com/v6/latest/USD
-        // Note: CORS may block some APIs from browser. If blocked, use server-side proxy or host.
-        const res = await fetch('https://open.er-api.com/v6/latest/USD');
-        if(!res.ok) throw new Error('Network');
-        const json = await res.json();
-        if(json && json.rates){ rates = json.rates; $('#cur_result').innerText = 'Rates updated (base USD).'; }
-        else $('#cur_result').innerText = 'Unexpected API response.';
-      }catch(e){ $('#cur_result').innerText = 'Could not fetch live rates (CORS or network). Using sample rates.'; }
+    // --- Client-side live rates using exchangerate.host (no key) ---
+async function fetchRates(){
+  document.getElementById('cur_result').innerText = 'Fetching live rates...';
+  try{
+    const res = await fetch('https://api.exchangerate.host/latest?base=USD');
+    if(!res.ok) throw new Error('Network: ' + res.status);
+    const json = await res.json();
+    if(json && json.rates){
+      rates = json.rates; // update app rates
+      // cache for 1 hour
+      localStorage.setItem('fx_rates_cache', JSON.stringify({ ts: Date.now(), rates }));
+      document.getElementById('cur_result').innerText = 'Rates updated (base USD).';
+    }else{
+      document.getElementById('cur_result').innerText = 'Unexpected API response.';
     }
+  }catch(e){
+    console.error(e);
+    const cached = localStorage.getItem('fx_rates_cache');
+    if(cached){
+      const obj = JSON.parse(cached);
+      rates = obj.rates;
+      document.getElementById('cur_result').innerText = 'Using cached rates (offline).';
+    } else {
+      document.getElementById('cur_result').innerText = 'Could not fetch live rates ('+e.message+'). Using sample rates.';
+    }
+  }
+}
+
 
     // -------------------- Gold --------------------
     function calcGold(){
