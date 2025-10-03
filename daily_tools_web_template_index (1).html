@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Daily Tools Web Template</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    section { border: 1px solid #ccc; border-radius: 8px; padding: 15px; margin-bottom: 20px; }
+    h2 { margin-top: 0; }
+    input, select, button { margin: 5px 0; padding: 8px; }
+  </style>
+</head>
+<body>
+  <h1>Daily Tools Web Template</h1>
+
+  <!-- Age Calculator -->
+  <section>
+    <h2>Age Calculator</h2>
+    <label for="day">Day:</label>
+    <select id="day"></select>
+
+    <label for="month">Month:</label>
+    <select id="month"></select>
+
+    <label for="year">Year:</label>
+    <select id="year"></select>
+
+    <button onclick="calculateAge()">Calculate Age</button>
+    <p id="ageResult"></p>
+  </section>
+
+  <script>
+    // Populate day, month, year dropdowns
+    const daySelect = document.getElementById("day");
+    const monthSelect = document.getElementById("month");
+    const yearSelect = document.getElementById("year");
+
+    for(let d=1; d<=31; d++){
+      let opt = document.createElement("option");
+      opt.value = d;
+      opt.textContent = d;
+      daySelect.appendChild(opt);
+    }
+
+    const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    months.forEach((m, idx)=>{
+      let opt = document.createElement("option");
+      opt.value = idx;
+      opt.textContent = m;
+      monthSelect.appendChild(opt);
+    });
+
+    let currentYear = new Date().getFullYear();
+    for(let y=currentYear; y>=1900; y--){
+      let opt = document.createElement("option");
+      opt.value = y;
+      opt.textContent = y;
+      yearSelect.appendChild(opt);
+    }
+
+    function calculateAge(){
+      let d = parseInt(daySelect.value);
+      let m = parseInt(monthSelect.value);
+      let y = parseInt(yearSelect.value);
+      let dob = new Date(y, m, d);
+      let diff = Date.now() - dob.getTime();
+      let ageDate = new Date(diff);
+      let age = Math.abs(ageDate.getUTCFullYear() - 1970);
+      document.getElementById("ageResult").innerText = "You are " + age + " years old.";
+    }
+  </script>
+</body>
+</html>
